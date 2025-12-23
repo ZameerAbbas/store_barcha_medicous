@@ -20,9 +20,7 @@ export default function Home() {
       className={`${geistSans.className} ${geistMono.className} `}
     >
       <main >
-     
         <ProductsPage />
-       
       </main>
     </div>
   );

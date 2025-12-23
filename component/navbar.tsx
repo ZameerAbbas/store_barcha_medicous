@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import Link from "next/link"
@@ -36,6 +38,24 @@ export default function Navbar() {
 
         }
     };
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        const updateCartCount = () => {
+            const cart = JSON.parse(localStorage.getItem("bmc_cart") || "[]");
+            const count = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
+            setCartCount(count);
+        };
+        updateCartCount();
+
+        window.addEventListener("storage", updateCartCount);
+
+        return () => {
+            window.removeEventListener("storage", updateCartCount);
+        };
+    }, []);
+
+
 
 
     return (
@@ -82,9 +102,12 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center space-x-6">
                         <Link href="/cart" className="relative hover:text-green-600">
                             <ShoppingCart className="w-6 h-6" />
-                            <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                0
-                            </span>
+                            {
+                                cartCount && (<span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    {cartCount}
+                                </span>)
+                            }
+
                         </Link>
                         <Link href="/login" className="text-gray-900 hover:text-green-600 font-medium">
                             Login / Signup

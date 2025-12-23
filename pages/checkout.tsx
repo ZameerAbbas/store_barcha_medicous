@@ -1,33 +1,60 @@
-// import ProtectedPage from "../../component/ProtectedPage";
-// import CheckoutView from "../../component/CheckoutView";
-
-// export default function CheckoutPage() {
-//     return (
-//         <ProtectedPage redirectTo="/login">
-//             <CheckoutView />
-//         </ProtectedPage>
-//     );
-// }
+/* eslint-disable react-hooks/purity */
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client"
 
 import Link from "next/link"
-import { Button } from "../../component/ui/button"
-import { Input } from "../../component/ui/input"
-import { Label } from "../../component/ui/label"
-import { Textarea } from "../../component/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "../../component/ui/radio-group"
+import { Button } from "../component/ui/button"
+import { Input } from "../component/ui/input"
+import { Label } from "../component/ui/label"
+import { Textarea } from "../component/ui/textarea"
+import { RadioGroup, RadioGroupItem } from "../component/ui/radio-group"
 import { ArrowLeft, MapPin, Phone, CreditCard, Truck, ShieldCheck } from "lucide-react"
 import Image from "next/image"
-import ProtectedPage from "../../component/ProtectedPage"
-import { useAuth } from "../../context/AuthContext"
+// import ProtectedPage from "../../component/ProtectedPage"
+import { useAuth } from "../context/AuthContext"
 import { useEffect, useState } from "react"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../component/ui/select";
+
+import { useSelector, useDispatch } from "react-redux";
+import { type AppDispatch, type RootState } from "../store/index";
+
+import {
+    startAddressesRealtime,
+
+    IAddress
+} from "../features/addressSlice";
+import { addOrder, IForm } from "../features/orderSlice"
+
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "../component/ui/dialog";
+
 
 function CheckoutContent() {
     const { user } = useAuth()
-    const [firstName, setFirstName] = useState("")
-    const [email, setEmail] = useState("")
-    const [phone, setPhone] = useState("")
+
+
+    const [form, setForm] = useState<IForm>({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        city: null,
+
+    })
 
     useEffect(() => {
         if (user) {
@@ -38,19 +65,117 @@ function CheckoutContent() {
         }
     }, [user])
 
-    const cartItems = [
-        { id: 1, name: "Panadol Advance", price: 150, quantity: 2, image: "/panadol-medicine-box.jpg" },
-        { id: 2, name: "Vitamin C 1000mg", price: 480, quantity: 1, image: "/vitamin-c-tablets.png" },
-        { id: 3, name: "Dettol Antiseptic", price: 320, quantity: 1, image: "/dettol-antiseptic-bottle.jpg" },
-    ]
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const deliveryFee = 100
-    const total = subtotal + deliveryFee
+    const dispatch = useDispatch<AppDispatch>();
+    const { addresses } = useSelector((state: RootState) => state.addresses);
+
+    useEffect(() => {
+        dispatch(startAddressesRealtime());
+
+    }, [dispatch]);
+
+
+
+
+    const [cartItems, setCartItems] = useState<any>([]);
+
+    useEffect(() => {
+        const storedCart = localStorage.getItem("bmc_cart");
+        if (storedCart) {
+            setCartItems(JSON.parse(storedCart));
+        }
+    }, []);
+
+    const subtotal = cartItems.reduce((sum: any, item: any) => sum + item.product.price * item.quantity, 0)
+
+    const FREE_DELIVERY_THRESHOLD = 2000;
+
+    const deliveryFee =
+        cartItems.length === 0
+            ? 0
+            : subtotal > FREE_DELIVERY_THRESHOLD
+                ? 0
+                : 100;
+
+    const total = subtotal + deliveryFee;
+
+
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [loader, setLoader] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState("");
+
+    const validatePromotion = (form: any) => {
+        const newErrors: { [key: string]: string } = {};
+
+
+
+        if (!form.firstName || form.firstName.trim() === "") {
+            newErrors.firstName = "First Name is required";
+        }
+
+        if (!form.lastName || form.lastName.trim() === "") {
+            newErrors.lastName = "last Name is required";
+        }
+        if (!form.phone || form.phone.trim() === "") {
+            newErrors.phone = "phone is required";
+        }
+        if (!form.city) {
+            newErrors.city = "city is required";
+        }
+
+
+
+
+
+        return newErrors;
+    };
+
+    console.log("form ", form)
+
+
+
+
+
+
+    const handleSubmit = async () => {
+        const validationErrors = validatePromotion(form);
+
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
+        setErrors({});
+        setLoader(true);
+
+        const fullOrderObject = {
+            customer: form,
+            ProductOrder: cartItems,
+            subtotal,
+            deliveryFee,
+            orderStatus: { status: "pending", position: 0 },
+            orderId: Math.floor(10000 + Math.random() * 90000),
+            orderDate: new Date().toISOString(),
+        };
+
+        try {
+            await dispatch(addOrder(fullOrderObject));
+            localStorage.removeItem("bmc_cart");
+            setCartItems([]);
+            setDialogMessage("✅ Your order has been successfully created!");
+        } catch (error) {
+            console.error("Error creating order:", error);
+            setDialogMessage("❌ There was an issue creating your order. Please try again.");
+        } finally {
+            setLoader(false);
+            setOpen(true);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
-         
+
 
             <div className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Header */}
@@ -81,14 +206,23 @@ function CheckoutContent() {
                                         <Input
                                             id="firstName"
                                             placeholder="Enter first name"
-                                            value={firstName}
-                                            onChange={(e) => setFirstName(e.target.value)}
+                                            value={form.firstName}
+                                            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
                                             required
                                         />
+                                        {errors.firstName && (
+                                            <p className="text-red-500 texxt-md">{errors.firstName}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="lastName">Last Name *</Label>
-                                        <Input id="lastName" placeholder="Enter last name" required />
+                                        <Input id="lastName" placeholder="Enter last name" required
+                                            value={form.lastName}
+                                            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                                        />
+                                        {errors.lastName && (
+                                            <p className="text-red-500 texxt-md">{errors.lastName}</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -98,10 +232,13 @@ function CheckoutContent() {
                                         id="phone"
                                         type="tel"
                                         placeholder="+92 XXX XXXXXXX"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
+                                        value={form.phone}
+                                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
                                         required
                                     />
+                                    {errors.phone && (
+                                        <p className="text-red-500 texxt-md">{errors.phone}</p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -110,8 +247,8 @@ function CheckoutContent() {
                                         id="email"
                                         type="email"
                                         placeholder="your.email@example.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        value={form.email}
+                                        onChange={(e) => setForm({ ...form, email: e.target.value })}
                                     />
                                 </div>
 
@@ -120,27 +257,37 @@ function CheckoutContent() {
                                     <Textarea id="address" placeholder="House/Flat No, Street, Area, Landmark" rows={3} required />
                                 </div>
 
-                                <div className="grid sm:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="city">City *</Label>
-                                        <Input id="city" value="Gilgit" readOnly className="bg-gray-50" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="area">Area/Branch *</Label>
-                                        <select
-                                            id="area"
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                            required
-                                        >
-                                            <option value="">Select nearest branch</option>
-                                            <option value="jutial">Jutial</option>
-                                            <option value="baseen">Baseen</option>
-                                            <option value="danyor">Danyor</option>
-                                            <option value="konodas">Konodas</option>
-                                            <option value="rahimabad">Rahimabad</option>
-                                            <option value="chilas">Chilas Road</option>
-                                        </select>
-                                    </div>
+                                <div >
+
+
+                                    <Label htmlFor="city">City Address *</Label>
+
+                                    <Select
+                                        value={form.city?.id || ""}
+                                        onValueChange={(id: string) => {
+                                            const selected = addresses.find((a) => a.id === id) || null;
+                                            setForm((prev) => ({ ...prev, city: selected }));
+                                        }}
+
+                                    >
+                                        <SelectTrigger id="city" className="w-full">
+                                            <SelectValue placeholder="Select nearest branch" />
+                                        </SelectTrigger>
+
+                                        <SelectContent>
+                                            {addresses.map((address) => (
+                                                <SelectItem key={address.id} value={address.id || ""}>
+                                                    {address.city}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+
+                                    {errors.city && (
+                                        <p className="text-red-500 text-sm">{errors.city}</p>
+                                    )}
+
+
                                 </div>
 
                                 <div className="space-y-2">
@@ -206,16 +353,16 @@ function CheckoutContent() {
 
                             {/* Cart Items */}
                             <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
-                                {cartItems.map((item) => (
-                                    <div key={item.id} className="flex gap-3">
+                                {cartItems.map((item: any) => (
+                                    <div key={item.product.id} className="flex gap-3">
                                         <div className="relative w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                            <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+                                            <Image src={item.product.image || "/placeholder.svg"} alt={item.product.name} fill className="object-cover" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-sm text-gray-900 truncate">{item.name}</p>
+                                            <p className="font-medium text-sm text-gray-900 truncate">{item.product.name}</p>
                                             <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                                             <p className="text-sm font-semibold text-gray-900">
-                                                Rs. {(item.price * item.quantity).toFixed(2)}
+                                                Rs. {(item.product.price * item.quantity).toFixed(2)}
                                             </p>
                                         </div>
                                     </div>
@@ -239,8 +386,10 @@ function CheckoutContent() {
                                 <span>Rs. {total.toFixed(2)}</span>
                             </div>
 
-                            <Button className="w-full" size="lg">
-                                Place Order
+                            <Button className="w-full cursor-pointer" size="lg"
+                                onClick={() => handleSubmit()}
+                            >
+                                {loader ? "Processing..." : "Place Order"}
                             </Button>
 
                             {/* Contact Info */}
@@ -267,14 +416,27 @@ function CheckoutContent() {
                     </div>
                 </div>
             </div>
-        </div>
+
+
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Order Status</DialogTitle>
+                    </DialogHeader>
+                    <DialogDescription>{dialogMessage}</DialogDescription>
+                    <DialogFooter>
+                        <Button onClick={() => setOpen(false)}>OK</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div >
     )
 }
 
 export default function CheckoutPage() {
     return (
-        <ProtectedPage redirectTo="/login">
-            <CheckoutContent />
-        </ProtectedPage>
+        // <ProtectedPage redirectTo="/login">
+        <CheckoutContent />
+        // </ProtectedPage>
     )
 }

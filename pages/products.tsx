@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 "use client"
@@ -8,97 +9,16 @@ import { type AppDispatch, type RootState } from "../store/index";
 import {
     startProductsRealtime,
 
+    Product
 } from "../features/productsSlice";
+
+
+
 
 import { ChevronDown } from "lucide-react"
 
 
-const productsAll = [
-    {
-        id: 1,
-        name: "Panadol Advance",
-        price: 150.0,
-        image: "/panadol-medicine-box.jpg",
-        inStock: true,
-    },
-    {
-        id: 2,
-        name: "Vitamin C 1000mg with Zinc",
-        price: 480.0,
-        image: "/vitamin-c-tablets.png",
-        inStock: true,
-    },
-    {
-        id: 3,
-        name: "Nurofen 200mg",
-        price: 280.0,
-        image: "/nurofen-medicine-box.jpg",
-        inStock: false,
-    },
-    {
-        id: 4,
-        name: "Dettol Antiseptic",
-        price: 320.0,
-        image: "/dettol-antiseptic-bottle.jpg",
-        inStock: true,
-    },
-    {
-        id: 5,
-        name: "Omeprazole 20mg",
-        price: 250.0,
-        image: "/omeprazole-medicine-pack.jpg",
-        inStock: true,
-    },
-    {
-        id: 6,
-        name: "Strepsils Honey & Lemon",
-        price: 180.0,
-        image: "/strepsils-lozenges.jpg",
-        inStock: true,
-    },
-    {
-        id: 7,
-        name: "Accu-Chek Instant Blood",
-        price: 3500.0,
-        image: "/blood-glucose-meter.jpg",
-        inStock: true,
-    },
-    {
-        id: 8,
-        name: "Baby Diapers Jumbo Pack",
-        price: 1800.0,
-        image: "/baby-diapers-pack.jpg",
-        inStock: true,
-    },
-    {
-        id: 9,
-        name: "Sudocrem Antiseptic",
-        price: 850.0,
-        image: "/sudocrem-cream-jar.jpg",
-        inStock: false,
-    },
-    {
-        id: 10,
-        name: "Disposable Face Masks - Pack of 50",
-        price: 400.0,
-        image: "/disposable-face-masks.jpg",
-        inStock: true,
-    },
-    {
-        id: 11,
-        name: "Thermometer Digital",
-        price: 750.0,
-        image: "/digital-thermometer.png",
-        inStock: true,
-    },
-    {
-        id: 12,
-        name: "Band-Aid Brand",
-        price: 250.0,
-        image: "/bandaid-box.jpg",
-        inStock: true,
-    },
-]
+
 
 const categories = [
     { name: "Pain Relief", subcategories: ["All Pain Relief"] },
@@ -135,6 +55,31 @@ export default function ProductsPage() {
         dispatch(startProductsRealtime());
 
     }, [dispatch]);
+
+    console.log("Products from Redux:", products);
+
+
+    const handleAddToCart = (product: Product) => {
+        if (!product.instock) return;
+
+        const cartKey = "bmc_cart";
+        const existingCart = JSON.parse(localStorage.getItem(cartKey) || "[]");
+
+        const itemIndex = existingCart.findIndex((item: any) => item.product.id === product.id);
+
+        if (itemIndex !== -1) {
+            existingCart[itemIndex].quantity += 1;
+        } else {
+            existingCart.push({ product, quantity: 1 });
+        }
+
+        localStorage.setItem(cartKey, JSON.stringify(existingCart));
+        window.dispatchEvent(new Event("cartUpdated"));
+    };
+
+
+
+
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -268,8 +213,7 @@ export default function ProductsPage() {
 
                         {/* Product Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {productsAll
-                                .filter((product) => !inStockOnly || product.inStock)
+                            {products
                                 .map((product) => (
                                     <div
                                         key={product.id}
@@ -277,7 +221,7 @@ export default function ProductsPage() {
                                     >
                                         <div className="aspect-square bg-gray-100 flex items-center justify-center p-4">
                                             <img
-                                                src={product.image}
+                                                src={product.productImage}
                                                 alt={product.name}
                                                 className="w-full h-full object-contain"
                                             />
@@ -286,14 +230,15 @@ export default function ProductsPage() {
                                             <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
                                             <p className="text-lg font-bold text-gray-900 mb-2">Rs. {product.price.toFixed(2)}</p>
                                             <span
-                                                className={`inline-block px-2 py-1 text-xs rounded mb-3 ${product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                                className={`inline-block px-2 py-1 text-xs rounded mb-3 ${product.instock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                                                     }`}
                                             >
-                                                {product.inStock ? "In Stock" : "Out of Stock"}
+                                                {product.instock ? "In Stock" : "Out of Stock"}
                                             </span>
                                             <button
-                                                disabled={!product.inStock}
-                                                className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${product.inStock
+                                                disabled={!product.instock}
+                                                onClick={() => handleAddToCart(product)}
+                                                className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${product.instock
                                                     ? "bg-gray-900 text-white hover:bg-gray-800"
                                                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                                                     }`}
