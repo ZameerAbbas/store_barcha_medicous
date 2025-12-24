@@ -8,15 +8,17 @@ import { useState } from "react"
 import { auth } from "../firebase";
 import { signOut, type User, onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
+    const { cart } = useCart();
 
 
 
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -38,40 +40,42 @@ export default function Navbar() {
 
         }
     };
-    const [cartCount, setCartCount] = useState(0);
-
-    useEffect(() => {
-        const updateCartCount = () => {
-            const cart = JSON.parse(localStorage.getItem("bmc_cart") || "[]");
-            const count = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
-            setCartCount(count);
-        };
-        updateCartCount();
-
-        window.addEventListener("storage", updateCartCount);
-
-        return () => {
-            window.removeEventListener("storage", updateCartCount);
-        };
-    }, []);
 
 
+    const totalItems = cart.reduce(
+        (sum: any, item: any) => sum + item.quantity,
+        0
+    );
 
 
     return (
         <nav className="border-b bg-white sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
+
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                                <span className="text-white font-bold text-xl">BMC</span>
+                            <div className="flex items-center gap-2 font-sans">
+                                {/* Logo Icon */}
+                                <div className="bg-blue-600 p-1.5 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                                        <line x1="12" y1="5" x2="12" y2="13" />
+                                        <line x1="8" y1="9" x2="16" y2="9" />
+                                    </svg>
+                                </div>
+
+                                {/* Brand Name */}
+                                <div className="flex flex-col leading-none">
+                                    <span className="text-xl font-bold text-slate-800 tracking-tight">BARCHA</span>
+                                    <span className="text-[10px] font-semibold text-blue-600 tracking-[0.2em] uppercase">Medicous</span>
+                                </div>
                             </div>
                         </Link>
                     </div>
 
-                    {/* Desktop Navigation */}
+
+
                     <div className="hidden md:flex items-center space-x-8">
                         <Link href="/" className="text-gray-900 hover:text-green-600 font-medium">
                             Home
@@ -84,9 +88,8 @@ export default function Navbar() {
                         </Link>
                     </div>
 
-                    {/* Search Bar - Desktop */}
                     <div className="hidden md:flex flex-1 max-w-md mx-8">
-                        <div className="relative w-full">
+                        {/* <div className="relative w-full">
                             <input
                                 type="text"
                                 placeholder="Search medicines..."
@@ -95,23 +98,21 @@ export default function Navbar() {
                             <button className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 <Search className="w-5 h-5" />
                             </button>
-                        </div>
+                        </div> */}
                     </div>
 
-                    {/* Right Actions */}
+
                     <div className="hidden md:flex items-center space-x-6">
                         <Link href="/cart" className="relative hover:text-green-600">
                             <ShoppingCart className="w-6 h-6" />
-                            {
-                                cartCount && (<span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                    {cartCount}
-                                </span>)
-                            }
+                            <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {totalItems}
+                            </span>
 
                         </Link>
-                        <Link href="/login" className="text-gray-900 hover:text-green-600 font-medium">
+                        {/* <Link href="/login" className="text-gray-900 hover:text-green-600 font-medium">
                             Login / Signup
-                        </Link>
+                        </Link> */}
 
                         <button
                             onClick={handleLogout}
@@ -123,13 +124,13 @@ export default function Navbar() {
                         </button>
                     </div>
 
-                    {/* Mobile menu button */}
+
                     <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                         {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                     </button>
                 </div>
 
-                {/* Mobile Search */}
+
                 <div className="md:hidden pb-4">
                     <div className="relative">
                         <input
@@ -164,9 +165,9 @@ export default function Navbar() {
                                     0
                                 </span>
                             </button>
-                            <Link href="/login" className="text-gray-900 hover:text-green-600 font-medium">
+                            {/* <Link href="/login" className="text-gray-900 hover:text-green-600 font-medium">
                                 Login / Signup
-                            </Link>
+                            </Link> */}
 
 
                             <button

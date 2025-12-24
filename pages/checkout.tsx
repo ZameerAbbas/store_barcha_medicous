@@ -33,6 +33,8 @@ import {
 } from "../features/addressSlice";
 import { addOrder, IForm } from "../features/orderSlice"
 
+import { useCart } from "../context/CartContext";
+
 import {
     Dialog,
     DialogContent,
@@ -76,26 +78,27 @@ function CheckoutContent() {
 
 
 
+    const {
+        cart,
+        clearCart
+    } = useCart();
 
-    const [cartItems, setCartItems] = useState<any>([]);
 
-    useEffect(() => {
-        const storedCart = localStorage.getItem("bmc_cart");
-        if (storedCart) {
-            setCartItems(JSON.parse(storedCart));
-        }
-    }, []);
+    console.log("cart", cart)
 
-    const subtotal = cartItems.reduce((sum: any, item: any) => sum + item.product.price * item.quantity, 0)
 
+
+    const subtotal = cart.reduce((sum: any, item: any) => sum + item.product.price * item.quantity, 0)
+
+    const cityDeliveryFee = Number(form?.city?.deliveryFee || 0);
     const FREE_DELIVERY_THRESHOLD = 2000;
 
     const deliveryFee =
-        cartItems.length === 0
+        cart.length === 0
             ? 0
             : subtotal > FREE_DELIVERY_THRESHOLD
                 ? 0
-                : 100;
+                : cityDeliveryFee;
 
     const total = subtotal + deliveryFee;
 
@@ -151,7 +154,7 @@ function CheckoutContent() {
 
         const fullOrderObject = {
             customer: form,
-            ProductOrder: cartItems,
+            ProductOrder: cart,
             subtotal,
             deliveryFee,
             orderStatus: { status: "pending", position: 0 },
@@ -161,8 +164,7 @@ function CheckoutContent() {
 
         try {
             await dispatch(addOrder(fullOrderObject));
-            localStorage.removeItem("bmc_cart");
-            setCartItems([]);
+            clearCart()
             setDialogMessage("✅ Your order has been successfully created!");
         } catch (error) {
             console.error("Error creating order:", error);
@@ -353,7 +355,7 @@ function CheckoutContent() {
 
                             {/* Cart Items */}
                             <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
-                                {cartItems.map((item: any) => (
+                                {cart.map((item: any) => (
                                     <div key={item.product.id} className="flex gap-3">
                                         <div className="relative w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                             <Image src={item.product.image || "/placeholder.svg"} alt={item.product.name} fill className="object-cover" />

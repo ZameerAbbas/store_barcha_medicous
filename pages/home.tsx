@@ -98,7 +98,7 @@ export default function HomePage() {
                                     size="lg"
                                     variant="outline"
                                     asChild
-                                    className="text-base h-12 border-2 bg-background hover:bg-muted"
+                                    className="text-base h-12 border-2 bg-background "
                                 >
                                     <a href="tel:+923001234567">
                                         <Phone className="w-5 h-5 mr-2" />
@@ -587,7 +587,7 @@ export default function HomePage() {
                                         size="lg"
                                         variant="outline"
                                         asChild
-                                        className="text-base h-12 border-2 bg-background hover:bg-muted"
+                                        className="text-base h-12 border-2 bg-background"
                                     >
                                         <a href="tel:+923001234567">
                                             <Phone className="w-5 h-5 mr-2" />

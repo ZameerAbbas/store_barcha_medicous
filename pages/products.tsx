@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { type AppDispatch, type RootState } from "../store/index";
 import {
@@ -16,6 +16,7 @@ import {
 
 
 import { ChevronDown } from "lucide-react"
+import { useCart } from "../context/CartContext";
 
 
 
@@ -39,6 +40,13 @@ export default function ProductsPage() {
     const [inStockOnly, setInStockOnly] = useState(false)
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
+
+    const [search, setSearch] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [sortBy, setSortBy] = useState("relevance")
+
+    const { addToCart } = useCart();
+
     const toggleCategory = (categoryName: string) => {
         setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
     }
@@ -59,26 +67,51 @@ export default function ProductsPage() {
     console.log("Products from Redux:", products);
 
 
-    const handleAddToCart = (product: Product) => {
-        if (!product.instock) return;
+    const filteredProducts = useMemo(() => {
+        let list = [...products];
 
-        const cartKey = "bmc_cart";
-        const existingCart = JSON.parse(localStorage.getItem(cartKey) || "[]");
-
-        const itemIndex = existingCart.findIndex((item: any) => item.product.id === product.id);
-
-        if (itemIndex !== -1) {
-            existingCart[itemIndex].quantity += 1;
-        } else {
-            existingCart.push({ product, quantity: 1 });
+        // 🔍 Search
+        if (search.trim()) {
+            const q = search.toLowerCase();
+            list = list.filter(
+                p =>
+                    p.name.toLowerCase().includes(q) ||
+                    p.description.toLowerCase().includes(q)
+            );
         }
 
-        localStorage.setItem(cartKey, JSON.stringify(existingCart));
-        window.dispatchEvent(new Event("cartUpdated"));
+        // 🏷 Category filter
+        if (selectedCategory) {
+            list = list.filter(
+                p => p.categoryId === selectedCategory
+            );
+        }
+
+        // ↕ Sort
+        switch (sortBy) {
+            case "priceLow":
+                list.sort((a, b) => a.price - b.price);
+                break;
+
+            case "priceHigh":
+                list.sort((a, b) => b.price - a.price);
+                break;
+
+            case "nameAZ":
+                list.sort((a, b) =>
+                    a.name.localeCompare(b.name)
+                );
+                break;
+        }
+
+        return list;
+    }, [products, search, selectedCategory, sortBy]);
+
+
+
+    const handleAddToCart = (product: any) => {
+        addToCart(product);
     };
-
-
-
 
 
     return (
@@ -202,18 +235,35 @@ export default function ProductsPage() {
                                 <span className="text-sm text-gray-600">
                                     Showing {products.length} of {products.length} products
                                 </span>
-                                <select className="px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
-                                    <option>Relevance</option>
-                                    <option>Price: Low to High</option>
-                                    <option>Price: High to Low</option>
-                                    <option>Name: A to Z</option>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="px-4 py-2 border rounded-lg text-sm"
+                                >
+                                    <option value="relevance">Relevance</option>
+                                    <option value="priceLow">Price: Low to High</option>
+                                    <option value="priceHigh">Price: High to Low</option>
+                                    <option value="nameAZ">Name: A to Z</option>
                                 </select>
+
                             </div>
                         </div>
+                        <div className="my-2">
+
+
+                            <input
+                                type="text"
+                                placeholder="Search medicines..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                            />
+                        </div>
+
 
                         {/* Product Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {products
+                            {filteredProducts
                                 .map((product) => (
                                     <div
                                         key={product.id}
