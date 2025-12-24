@@ -11,6 +11,16 @@ import {
 
     Product
 } from "../features/productsSlice";
+import {
+    startBrandRealtime,
+    type BrandOrder,
+} from "../features/brandSlice";
+
+import {
+    startCategoriesRealtime,
+
+    type Category,
+} from "../features/categoriesSlice";
 
 
 
@@ -21,16 +31,7 @@ import { useCart } from "../context/CartContext";
 
 
 
-const categories = [
-    { name: "Pain Relief", subcategories: ["All Pain Relief"] },
-    { name: "Vitamin & Supplements", subcategories: ["All Vitamins & Supplements"] },
-    { name: "Skin Care", subcategories: [] },
-    { name: "Baby Care", subcategories: [] },
-    { name: "Antibiotics", subcategories: [] },
-    { name: "Medical Devices", subcategories: [] },
-    { name: "First Aid", subcategories: [] },
-    { name: "Respiratory Care", subcategories: [] },
-]
+
 
 const brands = ["Pfizer", "GSK", "Abbott", "Getz Pharma", "Getz Pharma"]
 
@@ -47,9 +48,7 @@ export default function ProductsPage() {
 
     const { addToCart } = useCart();
 
-    const toggleCategory = (categoryName: string) => {
-        setExpandedCategory(expandedCategory === categoryName ? null : categoryName)
-    }
+
 
     const toggleBrand = (brand: string) => {
         setSelectedBrands((prev) => (prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]))
@@ -57,10 +56,14 @@ export default function ProductsPage() {
 
     const dispatch = useDispatch<AppDispatch>();
     const { products, loading: productsLoading } = useSelector((state: RootState) => state.products);
+    const { brandOrders } = useSelector((state: RootState) => state.brand);
+    const { categories } = useSelector((state: RootState) => state.categories);
 
 
     useEffect(() => {
         dispatch(startProductsRealtime());
+        dispatch(startBrandRealtime());
+        dispatch(startCategoriesRealtime());
 
     }, [dispatch]);
 
@@ -137,29 +140,18 @@ export default function ProductsPage() {
                             <div className="mb-6">
                                 <h3 className="font-semibold mb-3">Categories</h3>
                                 <div className="space-y-2">
-                                    {categories.map((category) => (
+                                    {categories.map((category: any) => (
                                         <div key={category.name}>
                                             <button
-                                                onClick={() => toggleCategory(category.name)}
-                                                className="flex items-center justify-between w-full text-left py-2 hover:text-green-600"
+                                                type="button"
+                                                onClick={() => setSelectedCategory(category.id)}
+                                                className={`flex items-center justify-between w-full  cursor-pointer   text-left py-2 hover:text-green-600 ${selectedCategory === category.id ? "text-green-600 font-medium" : "text-gray-700"
+                                                    }`}
                                             >
                                                 <span className="text-sm">{category.name}</span>
-                                                {category.subcategories.length > 0 && (
-                                                    <ChevronDown
-                                                        className={`w-4 h-4 transition-transform ${expandedCategory === category.name ? "rotate-180" : ""
-                                                            }`}
-                                                    />
-                                                )}
                                             </button>
-                                            {expandedCategory === category.name && category.subcategories.length > 0 && (
-                                                <div className="pl-4 space-y-1">
-                                                    {category.subcategories.map((sub) => (
-                                                        <div key={sub} className="py-1 text-sm text-gray-600">
-                                                            {sub}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+
+
                                         </div>
                                     ))}
                                 </div>
@@ -169,15 +161,15 @@ export default function ProductsPage() {
                             <div className="mb-6">
                                 <h3 className="font-semibold mb-3">Brand</h3>
                                 <div className="space-y-2">
-                                    {brands.map((brand) => (
-                                        <label key={brand} className="flex items-center space-x-2 cursor-pointer">
+                                    {brandOrders.map((brand) => (
+                                        <label key={brand.brand} className="flex items-center space-x-2 cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                checked={selectedBrands.includes(brand)}
-                                                onChange={() => toggleBrand(brand)}
+                                                checked={selectedBrands.includes(brand.brand)}
+                                                onChange={() => toggleBrand(brand.brand)}
                                                 className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
                                             />
-                                            <span className="text-sm">{brand}</span>
+                                            <span className="text-sm">{brand.brand}</span>
                                         </label>
                                     ))}
                                 </div>
