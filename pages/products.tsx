@@ -27,6 +27,7 @@ import {
 
 import { ChevronDown } from "lucide-react"
 import { useCart } from "../context/CartContext";
+import ProductCardSkeleton from "@/component/ProductCardSkeleton";
 
 
 
@@ -40,6 +41,8 @@ export default function ProductsPage() {
     const [selectedBrands, setSelectedBrands] = useState<string[]>([])
     const [inStockOnly, setInStockOnly] = useState(false)
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+
+    console.log("selectedBrands", selectedBrands)
 
 
     const [search, setSearch] = useState("");
@@ -69,7 +72,6 @@ export default function ProductsPage() {
 
     console.log("Products from Redux:", products);
 
-
     const filteredProducts = useMemo(() => {
         let list = [...products];
 
@@ -87,6 +89,13 @@ export default function ProductsPage() {
         if (selectedCategory) {
             list = list.filter(
                 p => p.categoryId === selectedCategory
+            );
+        }
+
+        // 🏷 Brand filter
+        if (selectedBrands.length > 0) {
+            list = list.filter(p =>
+                selectedBrands.includes(p.brandId)
             );
         }
 
@@ -108,7 +117,13 @@ export default function ProductsPage() {
         }
 
         return list;
-    }, [products, search, selectedCategory, sortBy]);
+    }, [
+        products,
+        search,
+        selectedCategory,
+        selectedBrands,
+        sortBy,
+    ]);
 
 
 
@@ -139,13 +154,13 @@ export default function ProductsPage() {
                             {/* Categories */}
                             <div className="mb-6">
                                 <h3 className="font-semibold mb-3">Categories</h3>
-                                <div className="space-y-2">
-                                    {categories.map((category: any) => (
+                                <div className="space-y-1">
+                                    {categories?.slice(0, 8)?.map((category: any) => (
                                         <div key={category.name}>
                                             <button
                                                 type="button"
                                                 onClick={() => setSelectedCategory(category.id)}
-                                                className={`flex items-center justify-between w-full  cursor-pointer   text-left py-2 hover:text-green-600 ${selectedCategory === category.id ? "text-green-600 font-medium" : "text-gray-700"
+                                                className={`flex items-center justify-between w-full  cursor-pointer   text-left py-1 hover:text-green-600 ${selectedCategory === category.id ? "text-green-600 font-medium" : "text-gray-700"
                                                     }`}
                                             >
                                                 <span className="text-sm">{category.name}</span>
@@ -161,7 +176,7 @@ export default function ProductsPage() {
                             <div className="mb-6">
                                 <h3 className="font-semibold mb-3">Brand</h3>
                                 <div className="space-y-2">
-                                    {brandOrders.map((brand) => (
+                                    {brandOrders?.slice(0, 8)?.map((brand) => (
                                         <label key={brand.brand} className="flex items-center space-x-2 cursor-pointer">
                                             <input
                                                 type="checkbox"
@@ -176,7 +191,7 @@ export default function ProductsPage() {
                             </div>
 
                             {/* Price Range */}
-                            <div className="mb-6">
+                            {/* <div className="mb-6">
                                 <h3 className="font-semibold mb-3">Price Range</h3>
                                 <div className="space-y-3">
                                     <div className="flex items-center space-x-2">
@@ -194,7 +209,7 @@ export default function ProductsPage() {
                                         <button className="px-3 py-1 text-xs border rounded-full hover:bg-gray-100">Over Rs. 500</button>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Availability */}
                             <div>
@@ -255,8 +270,11 @@ export default function ProductsPage() {
 
                         {/* Product Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {filteredProducts
-                                .map((product) => (
+                            {productsLoading
+                                ? Array.from({ length: 8 }).map((_, index) => (
+                                    <ProductCardSkeleton key={index} />
+                                ))
+                                : filteredProducts.map((product) => (
                                     <div
                                         key={product.id}
                                         className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -268,15 +286,25 @@ export default function ProductsPage() {
                                                 className="w-full h-full object-contain"
                                             />
                                         </div>
+
                                         <div className="p-4">
-                                            <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-                                            <p className="text-lg font-bold text-gray-900 mb-2">Rs. {product.price.toFixed(2)}</p>
+                                            <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
+                                                {product.name}
+                                            </h3>
+
+                                            <p className="text-lg font-bold text-gray-900 mb-2">
+                                                Rs. {product.price.toFixed(2)}
+                                            </p>
+
                                             <span
-                                                className={`inline-block px-2 py-1 text-xs rounded mb-3 ${product.instock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                                className={`inline-block px-2 py-1 text-xs rounded mb-3 ${product.instock
+                                                    ? "bg-green-100 text-green-800"
+                                                    : "bg-red-100 text-red-800"
                                                     }`}
                                             >
                                                 {product.instock ? "In Stock" : "Out of Stock"}
                                             </span>
+
                                             <button
                                                 disabled={!product.instock}
                                                 onClick={() => handleAddToCart(product)}
@@ -291,6 +319,7 @@ export default function ProductsPage() {
                                     </div>
                                 ))}
                         </div>
+
 
                         {/* Pagination */}
                         <div className="flex justify-center items-center space-x-2 mt-8">

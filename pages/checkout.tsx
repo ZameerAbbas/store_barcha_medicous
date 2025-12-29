@@ -45,6 +45,8 @@ import {
 } from "../component/ui/dialog";
 
 
+
+
 function CheckoutContent() {
     const { user } = useAuth()
 
@@ -135,6 +137,7 @@ function CheckoutContent() {
     };
 
     console.log("form ", form)
+    console.log("cart", cart)
 
 
 
@@ -166,6 +169,16 @@ function CheckoutContent() {
             await dispatch(addOrder(fullOrderObject));
             clearCart()
             setDialogMessage("✅ Your order has been successfully created!");
+
+            // await fetch("/api/sendOrderEmail", {
+            //     method: "POST",
+            //     headers: { "Content-Type": "application/json" },
+            //     body: JSON.stringify({
+            //         email: form.email,
+            //         firstName: form.firstName,
+            //         orderId: fullOrderObject.orderId,
+            //     }),
+            // });
         } catch (error) {
             console.error("Error creating order:", error);
             setDialogMessage("❌ There was an issue creating your order. Please try again.");
@@ -358,7 +371,7 @@ function CheckoutContent() {
                                 {cart.map((item: any) => (
                                     <div key={item.product.id} className="flex gap-3">
                                         <div className="relative w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                            <Image src={item.product.image || "/placeholder.svg"} alt={item.product.name} fill className="object-cover" />
+                                            <Image src={item.product.productImage || "/placeholder.svg"} alt={item.product.name} fill className="object-cover" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="font-medium text-sm text-gray-900 truncate">{item.product.name}</p>
