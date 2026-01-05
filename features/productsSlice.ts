@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
@@ -22,6 +23,7 @@ export interface Product {
   instock: boolean;
   productImage: string;
   mg: number;
+  totalSold?: number;
 }
 
 interface ProductState {
@@ -75,7 +77,7 @@ export const updateProduct = createAsyncThunk(
     const productRef = ref(db, `products/${product.id}`);
 
   
-    const { name, price, categoryId, description, productImage, mg } = product;
+    const { name, price, categoryId, description, productImage, mg ,totalSold} = product;
 
     await update(productRef, {
       name,
@@ -83,7 +85,8 @@ export const updateProduct = createAsyncThunk(
       categoryId,
       description,
       productImage,
-      mg
+      mg,
+      totalSold
     });
 
     return product;

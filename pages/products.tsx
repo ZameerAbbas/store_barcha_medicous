@@ -235,7 +235,7 @@ export default function ProductsPage() {
                             </div> */}
 
                             {/* Availability */}
-                            <div>
+                            {/* <div>
                                 <h3 className="font-semibold mb-3">Availability</h3>
                                 <div className="space-y-2">
                                     <label className="flex items-center space-x-2 cursor-pointer">
@@ -252,7 +252,7 @@ export default function ProductsPage() {
                                         <span className="text-sm">Out of Stock</span>
                                     </label>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </aside>
 

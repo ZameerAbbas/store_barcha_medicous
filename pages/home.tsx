@@ -37,6 +37,12 @@ import {
 
     type Category,
 } from "../features/categoriesSlice";
+
+import {
+    startProductsRealtime,
+
+    Product
+} from "../features/productsSlice";
 import { useEffect } from "react";
 
 
@@ -44,16 +50,27 @@ export default function HomePage() {
     const dispatch = useDispatch<AppDispatch>();
 
     const { categories } = useSelector((state: RootState) => state.categories);
+    const { products, loading: productsLoading } = useSelector((state: RootState) => state.products);
+
+
 
 
 
     useEffect(() => {
 
         dispatch(startCategoriesRealtime());
+        dispatch(startProductsRealtime());
 
     }, [dispatch]);
 
     console.log("categories", categories)
+
+
+    // Sort products by totalSold descending and get top 5
+    const top5Products = [...products]
+        .sort((a, b) => (b.totalSold || 0) - (a.totalSold || 0))
+        .slice(0, 4);
+
 
     return (
         <div className="min-h-screen">
@@ -259,44 +276,7 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {[
-                            {
-                                name: "Panadol Advance 500mg",
-                                category: "Pain Relief",
-                                price: "Rs. 150",
-                                image: "/panadol-medicine-box.jpg",
-                                badge: "Best Seller",
-                                stock: true,
-                                rating: 4.8,
-                            },
-                            {
-                                name: "Vitamin C 1000mg",
-                                category: "Vitamins & Supplements",
-                                price: "Rs. 480",
-                                image: "/vitamin-c-tablets.png",
-                                badge: "Popular",
-                                stock: true,
-                                rating: 4.9,
-                            },
-                            {
-                                name: "Dettol Antiseptic Liquid",
-                                category: "First Aid",
-                                price: "Rs. 320",
-                                image: "/dettol-antiseptic-bottle.jpg",
-                                badge: "Trending",
-                                stock: true,
-                                rating: 4.7,
-                            },
-                            {
-                                name: "Digital Thermometer",
-                                category: "Medical Devices",
-                                price: "Rs. 750",
-                                image: "/thermometer-digital.jpg",
-                                badge: "New",
-                                stock: true,
-                                rating: 4.6,
-                            },
-                        ].map((product, index) => (
+                        {top5Products.map((product: Product, index) => (
                             <Card
                                 key={index}
                                 className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50 overflow-hidden"
@@ -304,13 +284,13 @@ export default function HomePage() {
                                 <CardContent className="p-0">
                                     <div className="relative aspect-square overflow-hidden bg-muted">
                                         <Image
-                                            src={product.image || "/placeholder.svg"}
+                                            src={product.productImage || "/placeholder.svg"}
                                             alt={product.name}
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
-                                        <Badge className="absolute top-3 left-3 bg-primary shadow-lg">{product.badge}</Badge>
-                                        {product.stock && (
+                                        <Badge className="absolute top-3 left-3 bg-primary shadow-lg">{product.brandId}</Badge>
+                                        {product.instock && (
                                             <div className="absolute bottom-3 right-3 bg-green-500 text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
                                                 <CheckCircle2 className="w-3.5 h-3.5" />
                                                 In Stock
@@ -319,13 +299,14 @@ export default function HomePage() {
                                     </div>
                                     <div className="p-4 space-y-3">
                                         <div>
-                                            <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
+                                            <p className="text-xs text-muted-foreground mb-1">{categories.find((v) => v.id === product.categoryId)?.name}</p>
                                             <h3 className="font-semibold leading-tight mb-2">{product.name}</h3>
                                             <div className="flex items-center gap-1 mb-2">
-                                                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                                                <span className="text-sm font-medium">{product.rating}</span>
+                                                <p >Mg:</p>
+                                                <span className="text-sm font-medium">{product.mg
+                                                }</span>
                                             </div>
-                                            <p className="text-xl font-bold text-primary">{product.price}</p>
+                                            <p className="text-xl font-bold text-primary">Rs:{product.price}</p>
                                         </div>
                                         <Button size="sm" className="w-full">
                                             <Package className="w-4 h-4 mr-2" />

@@ -32,6 +32,11 @@ import {
     IAddress
 } from "../features/addressSlice";
 import { addOrder, IForm } from "../features/orderSlice"
+import {
+    updateProduct,
+
+    Product
+} from "../features/productsSlice";
 
 import { useCart } from "../context/CartContext";
 
@@ -43,6 +48,7 @@ import {
     DialogDescription,
     DialogFooter,
 } from "../component/ui/dialog";
+
 
 
 
@@ -167,18 +173,21 @@ function CheckoutContent() {
 
         try {
             await dispatch(addOrder(fullOrderObject));
+            for (const item of cart) {
+                await dispatch(
+                    updateProduct({
+                        ...item.product,
+                        totalSold: (item.product.totalSold || 0) + item.quantity,
+                    })
+                );
+
+                console.log("product sold", item.product.id);
+            }
             clearCart()
+
             setDialogMessage("✅ Your order has been successfully created!");
 
-            // await fetch("/api/sendOrderEmail", {
-            //     method: "POST",
-            //     headers: { "Content-Type": "application/json" },
-            //     body: JSON.stringify({
-            //         email: form.email,
-            //         firstName: form.firstName,
-            //         orderId: fullOrderObject.orderId,
-            //     }),
-            // });
+
         } catch (error) {
             console.error("Error creating order:", error);
             setDialogMessage("❌ There was an issue creating your order. Please try again.");
