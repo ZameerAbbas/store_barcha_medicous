@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import Link from "next/link"
+import { useEffect } from "react";
 
 import {
     Pill,
@@ -16,7 +17,14 @@ import {
     Badge as Bandage,
 } from "lucide-react"
 
-const categories = [
+import {
+    startCategoriesRealtime,
+    type Category,
+} from "../features/categoriesSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { type AppDispatch, type RootState } from "../store/index";
+
+const categoriesStatic = [
     {
         name: "Pain Relief",
         slug: "pain-relief",
@@ -116,9 +124,22 @@ const categories = [
 ]
 
 export default function CategoriesPage() {
+
+
+    const dispatch = useDispatch<AppDispatch>();
+
+    const { categories, loading } = useSelector((state: RootState) => state.categories);
+
+
+    useEffect(() => {
+
+        dispatch(startCategoriesRealtime());
+
+    }, [dispatch]);
+
     return (
         <div className="min-h-screen bg-gray-50">
-    
+
 
             <main>
                 {/* Header Section */}
@@ -134,7 +155,7 @@ export default function CategoriesPage() {
                 {/* Categories Grid */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {categories.map((category) => {
+                        {categoriesStatic.map((category) => {
                             const IconComponent = category.icon
                             return (
                                 <Link
@@ -156,7 +177,7 @@ export default function CategoriesPage() {
                                         <p className="text-sm text-gray-600 mb-4 text-pretty">{category.description}</p>
 
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm font-medium text-gray-500">{category.productCount} products</span>
+                                            <span className="text-sm font-medium text-gray-500">See All Products</span>
                                             <span className="text-green-600 group-hover:translate-x-1 transition-transform duration-300">
                                                 →
                                             </span>

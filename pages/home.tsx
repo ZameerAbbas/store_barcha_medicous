@@ -1,8 +1,14 @@
 /* eslint-disable react/no-unescaped-entities */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @next/next/no-img-element */
+
 import { Button } from "../component/ui/button"
 import { Card, CardContent } from "../component/ui/card"
 import { Badge } from "../component/ui/badge"
+
+import { useSelector, useDispatch } from "react-redux";
+import { type AppDispatch, type RootState } from "../store/index";
 import {
     Truck,
     MapPin,
@@ -26,10 +32,32 @@ import {
 import Link from "next/link"
 import Image from "next/image"
 
+import {
+    startCategoriesRealtime,
+
+    type Category,
+} from "../features/categoriesSlice";
+import { useEffect } from "react";
+
+
 export default function HomePage() {
+    const dispatch = useDispatch<AppDispatch>();
+
+    const { categories } = useSelector((state: RootState) => state.categories);
+
+
+
+    useEffect(() => {
+
+        dispatch(startCategoriesRealtime());
+
+    }, [dispatch]);
+
+    console.log("categories", categories)
+
     return (
         <div className="min-h-screen">
-         
+
 
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-background">
@@ -329,94 +357,101 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {[
-                            {
-                                icon: Pill,
-                                name: "Pain Relief",
-                                count: "200+ items",
-                                color: "red",
-                                href: "/products",
-                            },
-                            {
-                                icon: Heart,
-                                name: "Vitamins",
-                                count: "150+ items",
-                                color: "pink",
-                                href: "/products",
-                            },
-                            {
-                                icon: ThermometerIcon,
-                                name: "Medical Devices",
-                                count: "80+ items",
-                                color: "blue",
-                                href: "/products",
-                            },
-                            {
-                                icon: BandageIcon,
-                                name: "First Aid",
-                                count: "120+ items",
-                                color: "green",
-                                href: "/products",
-                            },
-                            {
-                                icon: Stethoscope,
-                                name: "Baby Care",
-                                count: "90+ items",
-                                color: "purple",
-                                href: "/products",
-                            },
-                            {
-                                icon: Pill,
-                                name: "Antibiotics",
-                                count: "110+ items",
-                                color: "amber",
-                                href: "/products",
-                            },
-                            {
-                                icon: Heart,
-                                name: "Skin Care",
-                                count: "130+ items",
-                                color: "indigo",
-                                href: "/products",
-                            },
-                            {
-                                icon: Pill,
-                                name: "Respiratory",
-                                count: "75+ items",
-                                color: "cyan",
-                                href: "/products",
-                            },
-                        ].map((category, index) => {
-                            const Icon = category.icon
-                            const colorClasses = {
-                                red: "from-red-500 to-red-600",
-                                pink: "from-pink-500 to-pink-600",
-                                blue: "from-blue-500 to-blue-600",
-                                green: "from-green-500 to-green-600",
-                                purple: "from-purple-500 to-purple-600",
-                                amber: "from-amber-500 to-amber-600",
-                                indigo: "from-indigo-500 to-indigo-600",
-                                cyan: "from-cyan-500 to-cyan-600",
-                            } as const
-                            return (
-                                <Link key={index} href={category.href}>
-                                    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary/50 overflow-hidden h-full">
-                                        <CardContent className="p-6 text-center space-y-4">
-                                            <div
-                                                className={`bg-gradient-to-br ${colorClasses[category.color as keyof typeof colorClasses]} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform shadow-lg`}
-                                            >
-                                                <Icon className="w-8 h-8 text-white" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-base mb-1">{category.name}</h3>
-                                                <p className="text-sm text-muted-foreground">{category.count}</p>
-                                            </div>
-                                            <ChevronRight className="w-4 h-4 mx-auto text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                                        </CardContent>
-                                    </Card>
-                                </Link>
-                            )
-                        })}
+                        {
+
+                            // [
+                            //     {
+                            //         icon: Pill,
+                            //         name: "Pain Relief",
+                            //         count: "200+ items",
+                            //         color: "red",
+                            //         href: "/products",
+                            //     },
+                            //     {
+                            //         icon: Heart,
+                            //         name: "Vitamins",
+                            //         count: "150+ items",
+                            //         color: "pink",
+                            //         href: "/products",
+                            //     },
+                            //     {
+                            //         icon: ThermometerIcon,
+                            //         name: "Medical Devices",
+                            //         count: "80+ items",
+                            //         color: "blue",
+                            //         href: "/products",
+                            //     },
+                            //     {
+                            //         icon: BandageIcon,
+                            //         name: "First Aid",
+                            //         count: "120+ items",
+                            //         color: "green",
+                            //         href: "/products",
+                            //     },
+                            //     {
+                            //         icon: Stethoscope,
+                            //         name: "Baby Care",
+                            //         count: "90+ items",
+                            //         color: "purple",
+                            //         href: "/products",
+                            //     },
+                            //     {
+                            //         icon: Pill,
+                            //         name: "Antibiotics",
+                            //         count: "110+ items",
+                            //         color: "amber",
+                            //         href: "/products",
+                            //     },
+                            //     {
+                            //         icon: Heart,
+                            //         name: "Skin Care",
+                            //         count: "130+ items",
+                            //         color: "indigo",
+                            //         href: "/products",
+                            //     },
+                            //     {
+                            //         icon: Pill,
+                            //         name: "Respiratory",
+                            //         count: "75+ items",
+                            //         color: "cyan",
+                            //         href: "/products",
+                            //     },
+                            // ]
+
+                            categories.map((category, index) => {
+                                const Icon = category.image
+                                const colorClasses = {
+                                    red: "from-red-500 to-red-600",
+                                    pink: "from-pink-500 to-pink-600",
+                                    blue: "from-blue-500 to-blue-600",
+                                    green: "from-green-500 to-green-600",
+                                    purple: "from-purple-500 to-purple-600",
+                                    amber: "from-amber-500 to-amber-600",
+                                    indigo: "from-indigo-500 to-indigo-600",
+                                    cyan: "from-cyan-500 to-cyan-600",
+                                } as const
+                                return (
+                                    <Link key={index} href={`/category/${category.id}`}>
+                                        <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary/50 overflow-hidden h-full">
+                                            <CardContent className="p-6 text-center space-y-4">
+                                                <div
+                                                    className={`bg-gradient-to-br ${colorClasses[category.color as keyof typeof colorClasses]} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform shadow-lg`}
+                                                >
+
+                                                    <div>
+                                                        <img src={category.image} alt={category.name} className="w-8 h-8 text-white" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-base mb-1">{category.name}</h3>
+                                                    <p className="text-sm text-muted-foreground">{category.description}</p>
+                                                </div>
+                                                <ChevronRight className="w-4 h-4 mx-auto text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
+                                )
+                            })}
                     </div>
                 </div>
             </section>
@@ -606,7 +641,7 @@ export default function HomePage() {
             </section>
 
             {/* Footer */}
-          
+
         </div>
     )
 }

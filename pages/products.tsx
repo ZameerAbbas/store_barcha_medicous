@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
@@ -33,14 +34,16 @@ import ProductCardSkeleton from "@/component/ProductCardSkeleton";
 
 
 
-
-const brands = ["Pfizer", "GSK", "Abbott", "Getz Pharma", "Getz Pharma"]
-
 export default function ProductsPage() {
     const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
     const [selectedBrands, setSelectedBrands] = useState<string[]>([])
     const [inStockOnly, setInStockOnly] = useState(false)
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+
+    const ITEMS_PER_PAGE = 2;
+
+    const [currentPage, setCurrentPage] = useState(1);
+
 
     console.log("selectedBrands", selectedBrands)
 
@@ -70,7 +73,16 @@ export default function ProductsPage() {
 
     }, [dispatch]);
 
-    console.log("Products from Redux:", products);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [products,
+        search,
+        selectedCategory,
+        selectedBrands,
+        sortBy,]);
+
+
 
     const filteredProducts = useMemo(() => {
         let list = [...products];
@@ -124,6 +136,17 @@ export default function ProductsPage() {
         selectedBrands,
         sortBy,
     ]);
+
+
+
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+
+    const paginatedProducts = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        return filteredProducts.slice(start, end);
+    }, [filteredProducts, currentPage]);
+
 
 
 
@@ -240,7 +263,7 @@ export default function ProductsPage() {
                             <h1 className="text-2xl font-bold mb-4 sm:mb-0">All Products ({products.length})</h1>
                             <div className="flex items-center space-x-4">
                                 <span className="text-sm text-gray-600">
-                                    Showing {products.length} of {products.length} products
+                                    Showing {ITEMS_PER_PAGE} of {products.length} products
                                 </span>
                                 <select
                                     value={sortBy}
@@ -274,7 +297,7 @@ export default function ProductsPage() {
                                 ? Array.from({ length: 8 }).map((_, index) => (
                                     <ProductCardSkeleton key={index} />
                                 ))
-                                : filteredProducts.map((product) => (
+                                : paginatedProducts.map((product) => (
                                     <div
                                         key={product.id}
                                         className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -289,7 +312,7 @@ export default function ProductsPage() {
 
                                         <div className="p-4">
                                             <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
-                                                {product.name}
+                                                {product.name.slice(0, 14)}
                                             </h3>
 
                                             <p className="text-lg font-bold text-gray-900 mb-2">
@@ -321,13 +344,44 @@ export default function ProductsPage() {
                         </div>
 
 
-                        {/* Pagination */}
-                        <div className="flex justify-center items-center space-x-2 mt-8">
-                            <button className="px-3 py-2 border rounded hover:bg-gray-100">←</button>
-                            <button className="px-4 py-2 bg-gray-900 text-white rounded">1</button>
-                            <button className="px-4 py-2 border rounded hover:bg-gray-100">2</button>
-                            <button className="px-3 py-2 border rounded hover:bg-gray-100">→</button>
-                        </div>
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center space-x-2 mt-8">
+
+                                <button
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                                    className="px-3 py-2 border rounded hover:bg-gray-100 disabled:opacity-50"
+                                >
+                                    ←
+                                </button>
+
+
+                                {Array.from({ length: totalPages }).map((_, index) => {
+                                    const page = index + 1;
+                                    return (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`px-4 py-2 rounded ${currentPage === page
+                                                ? "bg-gray-900 text-white"
+                                                : "border hover:bg-gray-100"
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    );
+                                })}
+
+
+                                <button
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                                    className="px-3 py-2 border rounded hover:bg-gray-100 disabled:opacity-50"
+                                >
+                                    →
+                                </button>
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>

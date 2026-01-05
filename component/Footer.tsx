@@ -1,7 +1,32 @@
-import { Phone ,MapPin,Clock} from "lucide-react"
+import { Phone, MapPin, Clock } from "lucide-react"
 import Link from "next/link"
 
- const Footerpage = () => {
+import { useSelector, useDispatch } from "react-redux";
+import { type AppDispatch, type RootState } from "../store/index";
+import {
+    startCategoriesRealtime,
+
+    type Category,
+} from "../features/categoriesSlice";
+import { useEffect } from "react";
+
+
+
+const Footerpage = () => {
+
+    const dispatch = useDispatch<AppDispatch>();
+
+    const { categories } = useSelector((state: RootState) => state.categories);
+
+
+
+    useEffect(() => {
+
+        dispatch(startCategoriesRealtime());
+
+    }, [dispatch]);
+
+    console.log("categories", categories)
     return (
         <footer className="bg-muted/50 border-t py-12 px-4">
             <div className="max-w-7xl mx-auto">
@@ -41,28 +66,23 @@ import Link from "next/link"
 
                     <div>
                         <h4 className="font-semibold mb-4">Categories</h4>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
-                                    Pain Relief
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
-                                    Vitamins
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
-                                    Baby Care
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">
-                                    First Aid
-                                </Link>
-                            </li>
-                        </ul>
+                        {categories
+                            ?.slice(0, 3)
+                            .map((v) =>
+                                v.id ? (
+                                    <ul key={v.id} className="space-y-2 text-sm">
+                                        <li>
+                                            <Link
+                                                href={`/category/${v.id}`}
+                                                className="text-muted-foreground hover:text-primary transition-colors"
+                                            >
+                                                {v.name}
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                ) : null
+                            )}
+
                     </div>
 
                     <div>
