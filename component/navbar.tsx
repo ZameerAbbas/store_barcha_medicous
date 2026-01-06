@@ -136,7 +136,7 @@ export default function Navbar() {
                 </div>
 
 
-                <div className="md:hidden pb-4">
+                {/* <div className="md:hidden pb-4">
                     <div className="relative">
                         <input
                             type="text"
@@ -147,29 +147,38 @@ export default function Navbar() {
                             <Search className="w-5 h-5" />
                         </button>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* Mobile Menu */}
             {mobileMenuOpen && (
-                <div className="md:hidden border-t bg-white">
+                <div className="md:hidden border-t bg-white absolute w-full">
                     <div className="px-4 py-4 space-y-3">
-                        <Link href="/" className="block py-2 text-gray-900 hover:text-green-600 font-medium">
+                        <Link href="/"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block py-2 text-gray-900 hover:text-green-600 font-medium">
                             Home
                         </Link>
-                        <Link href="/products" className="block py-2 text-gray-900 hover:text-green-600 font-medium">
+                        <Link href="/products"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block py-2 text-gray-900 hover:text-green-600 font-medium">
                             Products
                         </Link>
-                        <Link href="/categories" className="block py-2 text-gray-900 hover:text-green-600 font-medium">
+                        <Link href="/categories"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block py-2 text-gray-900 hover:text-green-600 font-medium">
                             Categories
                         </Link>
                         <div className="flex items-center justify-between pt-2 border-t">
-                            <button className="relative hover:text-green-600">
+                            <Link href="/cart"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="relative hover:text-green-600">
                                 <ShoppingCart className="w-6 h-6" />
                                 <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                    0
+                                    {totalItems}
                                 </span>
-                            </button>
+
+                            </Link>
                             {/* <Link href="/login" className="text-gray-900 hover:text-green-600 font-medium">
                                 Login / Signup
                             </Link> */}

@@ -84,9 +84,12 @@ export default function HomePage() {
                         {/* Left Column - Content */}
                         <div className="space-y-8">
                             <div className="space-y-4">
-                                <Badge variant="secondary" className="text-sm font-medium px-4 py-1.5 w-fit">
+                                <Badge variant="secondary" className="text-sm font-medium px-4 md:px-2 sm:px-0 py-1.5 w-fit ">
                                     <Award className="w-3.5 h-3.5 mr-2" />
+                                <p className="text-wrap">
+
                                     Gilgit's Most Trusted Medical Store Since 2010
+                                </p>
                                 </Badge>
                                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-balance">
                                     Your Health,{" "}
