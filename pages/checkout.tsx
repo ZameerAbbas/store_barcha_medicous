@@ -94,12 +94,14 @@ function CheckoutContent() {
 
     console.log("cart", cart)
 
+    console.log("addresses", addresses)
+
 
 
     const subtotal = cart.reduce((sum: any, item: any) => sum + item.product.price * item.quantity, 0)
 
     const cityDeliveryFee = Number(form?.city?.deliveryFee || 0);
-    const FREE_DELIVERY_THRESHOLD = 2000;
+    const FREE_DELIVERY_THRESHOLD = Number(form?.city?.deliveryFree || 0);
 
     const deliveryFee =
         cart.length === 0
@@ -142,7 +144,6 @@ function CheckoutContent() {
         return newErrors;
     };
 
-    console.log("form ", form)
     console.log("cart", cart)
 
 
@@ -196,6 +197,10 @@ function CheckoutContent() {
             setOpen(true);
         }
     };
+
+    console.log("form", form);
+
+
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -301,7 +306,7 @@ function CheckoutContent() {
                                         <SelectContent>
                                             {addresses.map((address) => (
                                                 <SelectItem key={address.id} value={address.id || ""}>
-                                                    {address.city}
+                                                    {address.city} {address.street}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -401,7 +406,7 @@ function CheckoutContent() {
                                 </div>
                                 <div className="flex justify-between text-gray-600">
                                     <span>Delivery Fee</span>
-                                    <span>Rs. {deliveryFee.toFixed(2)}</span>
+                                    <span>Rs. {deliveryFee ? deliveryFee.toFixed(2) : "Delivery is will be calculated after address "}</span>
                                 </div>
                             </div>
 
