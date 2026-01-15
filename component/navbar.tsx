@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
@@ -9,6 +10,7 @@ import { auth } from "../firebase";
 import { signOut, type User, onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 import { useCart } from "../context/CartContext";
+import Image from "next/image";
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -58,8 +60,8 @@ export default function Navbar() {
 
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="flex items-center gap-2 font-sans">
-                                {/* Logo Icon */}
+                            {/* <div className="flex items-center gap-2 font-sans">
+                               
                                 <div className="bg-blue-600 p-1.5 rounded-lg">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
@@ -68,12 +70,28 @@ export default function Navbar() {
                                     </svg>
                                 </div>
 
-                                {/* Brand Name */}
+                            
                                 <div className="flex flex-col leading-none">
                                     <span className="text-xl font-bold text-slate-800 tracking-tight">BARCHA</span>
                                     <span className="text-[10px] font-semibold text-blue-600 tracking-[0.2em] uppercase">Medicous</span>
                                 </div>
+                            </div> */}
+                            <div className="
+                                relative
+                                w-15 h-15
+                                sm:w-12 sm:h-12
+                                md:w-14 md:h-14
+                                lg:w-16 lg:h-16
+                            ">
+                                <Image
+                                    src="/logo.png"
+                                    alt="BARCHA Medicous"
+                                    fill
+                                    priority
+                                    className="object-contain"
+                                />
                             </div>
+
                         </Link>
                     </div>
 
