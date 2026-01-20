@@ -62,6 +62,7 @@ function CheckoutContent() {
         lastName: "",
         email: "",
         phone: "",
+        referralCode: "",
         city: null,
 
     })
@@ -170,6 +171,7 @@ function CheckoutContent() {
             orderStatus: { status: "pending", position: 0 },
             orderId: Math.floor(10000 + Math.random() * 90000),
             orderDate: new Date().toISOString(),
+            referralCode: form.referralCode,
         };
 
         try {
@@ -185,6 +187,15 @@ function CheckoutContent() {
                 console.log("product sold", item.product.id);
             }
             clearCart()
+            setForm({
+                firstName: "",
+                lastName: "",
+                email: "",
+                phone: "",
+                referralCode: "",
+                city: null,
+
+            })
 
             setDialogMessage("✅ Your order has been successfully created!");
 
@@ -322,6 +333,17 @@ function CheckoutContent() {
                                 <div className="space-y-2">
                                     <Label htmlFor="notes">Additional Notes (Optional)</Label>
                                     <Textarea id="notes" placeholder="Any special instructions for delivery?" rows={2} />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="referralCode">Referral Code</Label>
+                                    <Input
+                                        id="referralCode"
+                                        type="text"
+                                        placeholder="your.email@example.com"
+                                        value={form.referralCode}
+                                        onChange={(e) => setForm({ ...form, referralCode: e.target.value })}
+                                    />
                                 </div>
                             </div>
                         </div>

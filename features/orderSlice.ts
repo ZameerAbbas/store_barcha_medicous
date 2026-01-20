@@ -14,6 +14,7 @@ export interface IForm {
   lastName: string;
   email: string;
   phone: string;
+  referralCode: string;
   city: IAddress | null;
 }
 
