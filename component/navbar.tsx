@@ -107,6 +107,9 @@ export default function Navbar() {
                         <Link href="/categories" className="text-gray-900 hover:text-green-600 font-medium">
                             Categories
                         </Link>
+                        <Link href="/order-tracking" className="text-gray-900 hover:text-green-600 font-medium">
+                            Order Tacking
+                        </Link>
                     </div>
 
                     <div className="hidden md:flex flex-1 max-w-md mx-8">
@@ -186,6 +189,12 @@ export default function Navbar() {
                             onClick={() => setMobileMenuOpen(false)}
                             className="block py-2 text-gray-900 hover:text-green-600 font-medium">
                             Categories
+                        </Link>
+
+                        <Link href="/order-tracking" className="text-gray-900 hover:text-green-600 font-medium"
+                            onClick={() => setMobileMenuOpen(false)}
+                        >
+                            Order Tacking
                         </Link>
                         <div className="flex items-center justify-between pt-2 border-t">
                             <Link href="/cart"
