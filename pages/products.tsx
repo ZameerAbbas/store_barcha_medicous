@@ -40,7 +40,7 @@ export default function ProductsPage() {
     const [inStockOnly, setInStockOnly] = useState(false)
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
-    const ITEMS_PER_PAGE = 2;
+    const ITEMS_PER_PAGE = 16;
 
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -149,9 +149,13 @@ export default function ProductsPage() {
 
 
 
+    const [addedId, setAddedId] = useState<string | null>(null);
 
-    const handleAddToCart = (product: any) => {
+    const handleClick = (product: any) => {
         addToCart(product);
+
+        setAddedId(product.id);
+        setTimeout(() => setAddedId(null), 1500);
     };
 
 
@@ -327,16 +331,15 @@ export default function ProductsPage() {
                                             >
                                                 {product.instock ? "In Stock" : "Out of Stock"}
                                             </span>
-
                                             <button
                                                 disabled={!product.instock}
-                                                onClick={() => handleAddToCart(product)}
-                                                className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${product.instock
-                                                    ? "bg-gray-900 text-white hover:bg-gray-800"
-                                                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                    }`}
+                                                onClick={() => handleClick(product)}
+                                                className={`w-full py-2 px-4 rounded-lg font-medium transition-all duration-200 transform cursor-pointer
+                                             ${product.instock ? "bg-gray-900 text-white hover:bg-gray-800 active:scale-95" :
+                                                 "bg-gray-300 text-gray-500 cursor-not-allowed"} 
+                                                 ${addedId === product.id ? "bg-green-600 scale-105" : ""} `}
                                             >
-                                                Add to Cart
+                                                {addedId === product.id ? "Added ✓" : "Add to Cart"}
                                             </button>
                                         </div>
                                     </div>

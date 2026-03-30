@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -43,11 +44,15 @@ import {
 
     Product
 } from "../features/productsSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useCart } from "../context/CartContext";
 
 
 export default function HomePage() {
     const dispatch = useDispatch<AppDispatch>();
+
+
+    const { addToCart } = useCart();
 
     const { categories } = useSelector((state: RootState) => state.categories);
     const { products, loading: productsLoading } = useSelector((state: RootState) => state.products);
@@ -72,6 +77,18 @@ export default function HomePage() {
         .slice(0, 4);
 
 
+
+
+
+    const [addedId, setAddedId] = useState<string | null>(null);
+
+    const handleClick = (product: any) => {
+        addToCart(product);
+
+        setAddedId(product.id);
+        setTimeout(() => setAddedId(null), 1500);
+    };
+
     return (
         <div className="min-h-screen">
 
@@ -86,10 +103,10 @@ export default function HomePage() {
                             <div className="space-y-4">
                                 <Badge variant="secondary" className="text-sm font-medium px-4 md:px-2 sm:px-0 py-1.5 w-fit ">
                                     <Award className="w-3.5 h-3.5 mr-2" />
-                                <p className="text-wrap">
+                                    <p className="text-wrap">
 
-                                    Gilgit's Most Trusted Medical Store Since 2010
-                                </p>
+                                        Gilgit's Most Trusted Medical Store Since 2010
+                                    </p>
                                 </Badge>
                                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-balance">
                                     Your Health,{" "}
@@ -311,10 +328,19 @@ export default function HomePage() {
                                             </div>
                                             <p className="text-xl font-bold text-primary">Rs:{product.price}</p>
                                         </div>
-                                        <Button size="sm" className="w-full">
-                                            <Package className="w-4 h-4 mr-2" />
-                                            Add to Cart
-                                        </Button>
+                                        <button
+                                            disabled={!product.instock}
+                                            onClick={() => handleClick(product)}
+                                            className={`w-full py-2 px-4 rounded-lg font-medium transition-all duration-200 transform cursor-pointer
+    ${product.instock
+                                                    ? "bg-gray-900 text-white hover:bg-gray-800 active:scale-95"
+                                                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                }
+    ${addedId === product.id ? "bg-green-600 scale-105" : ""}
+  `}
+                                        >
+                                            {addedId === product.id ? "Added ✓" : "Add to Cart"}
+                                        </button>
                                     </div>
                                 </CardContent>
                             </Card>

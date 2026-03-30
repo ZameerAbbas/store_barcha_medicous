@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-undef */
 /* eslint-disable react-hooks/purity */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -12,7 +13,6 @@ import { Textarea } from "../component/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "../component/ui/radio-group"
 import { ArrowLeft, MapPin, Phone, CreditCard, Truck, ShieldCheck } from "lucide-react"
 import Image from "next/image"
-// import ProtectedPage from "../../component/ProtectedPage"
 import { useAuth } from "../context/AuthContext"
 import { useEffect, useState } from "react"
 import {
@@ -28,14 +28,10 @@ import { type AppDispatch, type RootState } from "../store/index";
 
 import {
     startAddressesRealtime,
-
-    IAddress
 } from "../features/addressSlice";
 import { addOrder, IForm } from "../features/orderSlice"
 import {
     updateProduct,
-
-    Product
 } from "../features/productsSlice";
 
 import { useCart } from "../context/CartContext";
@@ -49,13 +45,15 @@ import {
     DialogFooter,
 } from "../component/ui/dialog";
 
+import { AuthProvider } from "../context/AuthContext";
+import ProtectedPage from "../component/ProtectedPage";
+
 
 
 
 
 function CheckoutContent() {
-    const { user } = useAuth()
-
+    const { user, profile } = useAuth();
 
     const [form, setForm] = useState<IForm>({
         firstName: "",
@@ -64,18 +62,25 @@ function CheckoutContent() {
         phone: "",
         referralCode: "",
         city: null,
-
-    })
+    });
 
     useEffect(() => {
-        if (user) {
-            // const nameParts = user.name.split(" ")
-            // setFirstName(nameParts[0] || "")
-            // setEmail(user.email)
-            // setPhone(user.phone)
+        if (user && profile) {
+            setForm({
+                firstName: profile.firstName || "",
+                lastName: profile.lastName || "",
+                email: user.email || "",
+                phone: profile.phone || "",
+                referralCode: profile.referralCode || "",
+                city: profile.city || null,
+            });
         }
-    }, [user])
+    }, [user, profile]);
 
+    console.log("user", user)
+    console.log("profile", profile)
+
+    console.log("form", form)
 
     const dispatch = useDispatch<AppDispatch>();
     const { addresses } = useSelector((state: RootState) => state.addresses);
@@ -187,15 +192,7 @@ function CheckoutContent() {
                 console.log("product sold", item.product.id);
             }
             clearCart()
-            setForm({
-                firstName: "",
-                lastName: "",
-                email: "",
-                phone: "",
-                referralCode: "",
-                city: null,
-
-            })
+           
 
             setDialogMessage("✅ Your order has been successfully created!");
 
@@ -340,7 +337,7 @@ function CheckoutContent() {
                                     <Input
                                         id="referralCode"
                                         type="text"
-                                        placeholder="your.email@example.com"
+                                        placeholder="your referral code"
                                         value={form.referralCode}
                                         onChange={(e) => setForm({ ...form, referralCode: e.target.value })}
                                     />
@@ -484,10 +481,17 @@ function CheckoutContent() {
     )
 }
 
+
+
+
+
+
 export default function CheckoutPage() {
     return (
-        // <ProtectedPage redirectTo="/login">
-        <CheckoutContent />
-        // </ProtectedPage>
-    )
+        <AuthProvider>
+            <ProtectedPage>
+                <CheckoutContent />
+            </ProtectedPage>
+        </AuthProvider>
+    );
 }

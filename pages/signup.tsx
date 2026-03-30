@@ -27,17 +27,20 @@ import {
   startAddressesRealtime,
   IAddress
 } from "../features/addressSlice";
+import { getDatabase, ref, set } from "firebase/database";
 
 export default function Signup() {
   const [form, setForm] = useState<{
     firstName: string;
     lastName: string;
     phone: string;
+    referralCode: string;
     city: IAddress | null;
   }>({
     firstName: "",
     lastName: "",
     phone: "",
+    referralCode: "",
     city: null,
   });
 
@@ -80,8 +83,36 @@ export default function Signup() {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
+      const user = userCredential.user;
+
+      const userData = {
+        uid: user.uid,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        phone: form.phone,
+        email,
+        city: form.city,
+        referralCode: form.referralCode || null,
+        createdAt: new Date().toISOString(),
+      };
+
+      // ✅ Save to localStorage
+      localStorage.setItem("user", JSON.stringify(userData));
+      if (form.referralCode) {
+        localStorage.setItem("referralCode", form.referralCode);
+      }
+
+      // ✅ Save to Realtime Database
+      const db = getDatabase();
+      await set(ref(db, `users/${user.uid}`), userData);
+
+      // ✅ Redirect after signup
       router.replace(next || "/checkout");
     } catch (err: any) {
       const msg = err.message
@@ -95,47 +126,6 @@ export default function Signup() {
     }
   };
 
-
-  //   const handleSignup = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setError("");
-
-  //   const validationErrors = validateForm(form);
-  //   if (Object.keys(validationErrors).length) {
-  //     setErrors(validationErrors);
-  //     return;
-  //   } else {
-  //     setErrors({});
-  //   }
-
-  //   try {
-  //     // 1️⃣ Create user with email and password
-  //     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  //     const user = userCredential.user;
-
-  //     // 2️⃣ Store additional info in Firestore
-  //     await setDoc(doc(db, "users", user.uid), {
-  //       firstName: form.firstName,
-  //       lastName: form.lastName,
-  //       phone: form.phone,
-  //       city: form.city,
-  //       email,
-  //       createdAt: new Date(),
-  //     });
-
-  //     // 3️⃣ Redirect after signup
-  //     router.replace(next || "/checkout");
-  //   } catch (err: any) {
-  //     const msg = err.message
-  //       ?.replace("Firebase: Error (auth/", "")
-  //       ?.replace(").", "")
-  //       ?.split("-")
-  //       ?.join(" ")
-  //       ?.toUpperCase();
-
-  //     setError(msg || "SIGNUP FAILED");
-  //   }
-  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -232,6 +222,21 @@ export default function Signup() {
             </Select>
             {errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
           </div>
+
+
+          <div>
+            <Label htmlFor="referralCode">Referral Code</Label>
+            <Input
+              id="referralCode"
+              placeholder="Enter referral code (optional)"
+              value={form.referralCode}
+              onChange={(e) =>
+                setForm({ ...form, referralCode: e.target.value })
+              }
+            />
+          </div>
+
+
 
           {/* Error */}
           {error && (

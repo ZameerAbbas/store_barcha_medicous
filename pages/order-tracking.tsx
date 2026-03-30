@@ -26,7 +26,7 @@ export default function OrderTrackingPage() {
             const snapshot = await get(q);
 
             if (snapshot.exists()) {
-                const data = Object.values(snapshot.val())[0]; // get first match
+                const data = Object.values(snapshot.val())[0]; 
                 setOrder(data);
             } else {
                 setError("Order not found");
