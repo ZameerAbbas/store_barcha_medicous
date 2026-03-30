@@ -177,6 +177,7 @@ function CheckoutContent() {
             orderId: Math.floor(10000 + Math.random() * 90000),
             orderDate: new Date().toISOString(),
             referralCode: form.referralCode,
+            isPaidToRefrral: false
         };
 
         try {

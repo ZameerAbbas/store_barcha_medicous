@@ -27,6 +27,7 @@ export interface Order {
   subtotal: number;
   deliveryFee: number;
   total?: number;
+  isPaidToRefrral: boolean;
   createdAt?: string;
 }
 
