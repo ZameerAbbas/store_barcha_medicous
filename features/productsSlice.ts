@@ -8,18 +8,25 @@ import {
   push,
   update,
   remove,
-  onValue
+  onValue,
+  query,
+  orderByChild,
+  limitToLast,
+  get
 } from "firebase/database";
 
 
 export interface Product {
- 
+
   id?: string;
   name: string;
   price: number;
-  categoryId: string; 
+  category: {
+    id: string;
+    name: string;
+  };
   description: string;
-  brandId: string;
+  brand: string;
   instock: boolean;
   productImage: string;
   mg: number;
@@ -45,9 +52,9 @@ export const startProductsRealtime = createAsyncThunk(
       const data = snapshot.val();
       const productsa: Product[] = data
         ? Object.keys(data).map(id => ({
-            id,
-            ...data[id]
-          }))
+          id,
+          ...data[id]
+        }))
         : [];
 
       dispatch(setProducts(productsa));
@@ -61,11 +68,39 @@ export const addProduct = createAsyncThunk(
   "products/add",
   async (product: Product) => {
     const productsRef = ref(db, "products");
-  
-    const { id, ...dataToPush } = product; 
+
+    const { id, ...dataToPush } = product;
 
     const newRef = await push(productsRef, dataToPush);
     return { id: newRef.key!, ...product };
+  }
+);
+
+
+export const getTopSellingProducts = createAsyncThunk(
+  "products/topSelling",
+  async () => {
+    const productsRef = ref(db, "products");
+
+    const topQuery = query(
+      productsRef,
+      orderByChild("totalSold"),
+      limitToLast(5) // gives highest 5, but in ASC order
+    );
+
+    const snapshot = await get(topQuery);
+
+    const data: any[] = [];
+
+    snapshot.forEach((child:any) => {
+      data.push({
+        id: child.key,
+        ...child.val(),
+      });
+    });
+
+    // 🔥 IMPORTANT: reverse to make it DESC (highest first)
+    return data.reverse();
   }
 );
 
@@ -76,16 +111,17 @@ export const updateProduct = createAsyncThunk(
 
     const productRef = ref(db, `products/${product.id}`);
 
-  
-    const { name, price, categoryId, description, productImage, mg ,totalSold} = product;
+
+    const { name, price, category, description, productImage, mg, totalSold, brand } = product;
 
     await update(productRef, {
       name,
       price,
-      categoryId,
+      category,
       description,
       productImage,
       mg,
+      brand,
       totalSold
     });
 
@@ -117,6 +153,9 @@ const productsSlice = createSlice({
     builder
       .addCase(addProduct.fulfilled, (state, action) => {
         state.products.push(action.payload);
+      })
+      .addCase(getTopSellingProducts.fulfilled, (state, action) => {
+        state.products = action.payload;
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
         const index = state.products.findIndex(p => p.id === action.payload.id);

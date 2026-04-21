@@ -190,8 +190,6 @@ function CheckoutContent() {
                         totalSold: (item.product.totalSold || 0) + item.quantity,
                     })
                 );
-
-                console.log("product sold", item.product.id);
             }
             clearCart()
            

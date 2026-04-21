@@ -52,6 +52,8 @@ export default function HomePage() {
     const dispatch = useDispatch<AppDispatch>();
 
 
+
+
     const { addToCart } = useCart();
 
     const { categories } = useSelector((state: RootState) => state.categories);
@@ -309,7 +311,7 @@ export default function HomePage() {
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
-                                        <Badge className="absolute top-3 left-3 bg-primary shadow-lg">{product.brandId}</Badge>
+                                        <Badge className="absolute top-3 left-3 bg-primary shadow-lg">{product.brand}</Badge>
                                         {product.instock && (
                                             <div className="absolute bottom-3 right-3 bg-green-500 text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
                                                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -319,7 +321,7 @@ export default function HomePage() {
                                     </div>
                                     <div className="p-4 space-y-3">
                                         <div>
-                                            <p className="text-xs text-muted-foreground mb-1">{categories.find((v) => v.id === product.categoryId)?.name}</p>
+                                            <p className="text-xs text-muted-foreground mb-1">{product.category?.name}</p>
                                             <h3 className="font-semibold leading-tight mb-2">{product.name}</h3>
                                             <div className="flex items-center gap-1 mb-2">
                                                 <p >Mg:</p>
